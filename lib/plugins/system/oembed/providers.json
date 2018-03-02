@@ -216,7 +216,7 @@
             "([\\w\\.]*instagram\\.com/p/([a-zA-Z0-9_-]+))",
             "(instagr\\.am/p/([a-zA-Z0-9_-]+))"
         ],
-        "endpoint": "https://api.instagram.com/oembed?format={format}&url=http://{1}"
+        "endpoint": "https://api.instagram.com/oembed?format={format}&url=https://{1}"
     },
     {
         "name": "Instagr.am user page",
@@ -224,7 +224,7 @@
             "([\\w\\.]*instagram\\.com/)[a-zA-Z0-9_-]+/(p/[a-zA-Z0-9_-]+)",
             "(instagr\\.am/)[a-zA-Z0-9_-]+/(p/[a-zA-Z0-9_-]+)"
         ],
-        "endpoint": "https://api.instagram.com/oembed?format={format}&url=http://{1}{2}"
+        "endpoint": "https://api.instagram.com/oembed?format={format}&url=https://{1}{2}"
     },
     {
         "name": "DailyMotion",
@@ -425,13 +425,6 @@
         "endpoint": "http://www.behance.net/services/oembed"
     },
     {
-        "name": "Ted",
-        "templates": [
-            "ted\\.com/talks/([a-zA-Z0-9-_]+)"
-        ],
-        "endpoint": "http://www.ted.com/services/v1/oembed.{format}?url=https://ted.com/talks/{1}"        
-    },
-    {
         "name": "Codepen",
         "templates": [
             "codepen\\.io/.*/pen/.*"
@@ -505,9 +498,9 @@
     {
         "name": "Adobe Stock",
         "templates": [
-            "stock.adobe.com/.*"
+            "stock.adobe.com/(?:images|stock-photo)/([a-zA-Z0-9-]+\/\\d+)"
         ],
-        "endpoint": "https://stock.adobe.com/oembed"
+        "endpoint": "https://stock.adobe.com/oembed?url=https://stock.adobe.com/stock-photo/{1}"
     },
     {
         "name": "Reddit",

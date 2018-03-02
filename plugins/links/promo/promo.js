@@ -21,7 +21,16 @@ module.exports = {
         delete options2.jar;
 
         core.run(promoUri, options2, function(error, data) {
-            cb(error, {
+
+            var wrappedError = null;
+
+            if (error) {
+                wrappedError = {
+                    promoError: error
+                };
+            }
+
+            cb(wrappedError, {
                 promo: data
             });
         });

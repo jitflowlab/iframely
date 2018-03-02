@@ -189,8 +189,8 @@ module.exports = {
         }
 
         var locale = options.getProviderOptions('locale');
-        if (locale && /^\w{2}\-\w{2,3}$/.test(locale)) {
-            html = html.replace(/<blockquote class="twitter\-tweet"( data\-lang="\w+_\w+")?/, '<blockquote class="twitter-tweet" data-lang="' + locale + '"');
+        if (locale && /^\w{2}(?:\_|\-)\w{2,3}$/.test(locale)) {
+            html = html.replace(/<blockquote class="twitter\-tweet"( data\-lang="\w+(?:\_|\-)\w+")?/, '<blockquote class="twitter-tweet" data-lang="' + locale.replace('-', '_') + '"');
         }
 
         var links = [];
@@ -225,8 +225,8 @@ module.exports = {
                 "max-width": twitter_oembed["width"] || 550
             };
 
-            if ((/https:\/\/t\.co\//i.test(twitter_oembed.html) && !/pic\.twitter\.com\//i.test(twitter_oembed.html)) 
-                || (twitter_og.image && !twitter_og.image.user_generated)) { // user_generated is string = 'true' for pics
+            if ((/https:\/\/t\.co\//i.test(twitter_oembed.html) && !/pic\.twitter\.com\//i.test(twitter_oembed.html)) // there's a link and a card inside the tweet
+                || (twitter_og.image && !(twitter_og.image.user_generated || /\/profile_images\//i.test(twitter_og.image)))) { // user_generated is string = 'true' for pics
                 app['aspect-ratio'] = 1;
             }
 
