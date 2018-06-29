@@ -190,6 +190,13 @@
         "endpoint": "https://publish.twitter.com/oembed?i=user&url=https://{1}"
     },
     {
+        "name": "Twitter Statuses",
+        "templates": [
+            "twitter\\.com/\\w+/status(?:es)?/\\d+"
+        ],
+        "endpoint": "https://publish.twitter.com/oembed"
+    },
+    {
         "name": "GfyCat",
         "templates": [
             "gfycat\\.com/.+"
@@ -660,5 +667,11 @@
             "datawrapper.dwcdn.net/.*"
         ],
         "endpoint": "https://app.datawrapper.de/api/plugin/oembed"
+    }, {
+        "name": "Tableau Public",
+        "templates": [            
+            "public.tableau.com/.*"
+        ],
+        "endpoint": "https://public.tableau.com/profile/api/oembed"
     }
 ]
