@@ -39,12 +39,43 @@ module.exports = {
             return {
                 schemaVideoObject: result
             };
+
+        } else {
+
+            // let's try to find ld+json in the body
+            var $script = cheerio('script[type="application/ld+json"]:contains("embed")'); // embedURL can be embedurl, embedUrl, etc.
+
+            if ($script.length === 1) {
+
+                try {
+
+                    var json = JSON.parse($script.text());
+
+                    if (json['@type']) {
+                        ld = {};
+                        ld[json['@type'].toLowerCase()] = json;
+
+                        if (__allowEmbedURL !== 'skip_ld') {
+                            return {
+                                ld: ld
+                            }
+                        } else if (ld.videoobject || ld.mediaobject) {
+                            return {
+                                schemaVideoObject: ld.videoobject || ld.mediaobject
+                            }
+                        }
+
+                    }
+
+                } catch (ex) {
+                    // broken json, c'est la vie
+                }
+            }
+
         }
     },
 
-    getLinks: function(schemaVideoObject, whitelistRecord) {
-
-        if (!whitelistRecord.isAllowed('html-meta.embedURL')) {return;}
+    getLinks: function(schemaVideoObject, whitelistRecord) {        
 
         var links = [];
         
@@ -57,7 +88,10 @@ module.exports = {
             });
         }
 
-        var href = schemaVideoObject.embedURL || schemaVideoObject.embedUrl || schemaVideoObject.embedurl;
+        if (!whitelistRecord.isAllowed('html-meta.embedURL')) {return links;}
+
+        var href = schemaVideoObject.embedURL || schemaVideoObject.embedUrl || schemaVideoObject.embedurl;     
+
         if (href) {
             var player = {
                 href: whitelistRecord.isAllowed('html-meta.embedURL', CONFIG.R.ssl) ? href.replace(/^http:\/\//i, '//') : href,

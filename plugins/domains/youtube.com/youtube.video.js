@@ -11,7 +11,7 @@ module.exports = {
         /^https?:\/\/www\.youtube\.com\/embed\/([a-zA-Z0-9_-]+)/i,
         /^https?:\/\/www\.youtube\.com\/v\/([a-zA-Z0-9_-]+)/i,
         /^https?:\/\/www\.youtube\.com\/user\/[a-zA-Z0-9_-]+\/?\?v=([a-zA-Z0-9_-]+)/i,
-        /^https?:\/\/www\.youtube-nocookie\.com\/v\/([a-zA-Z0-9_-]+)/i
+        /^https?:\/\/www\.youtube-nocookie\.com\/(?:v|embed)\/([a-zA-Z0-9_-]+)/i
     ],
 
     mixins: ["domain-icon"],
@@ -131,37 +131,42 @@ module.exports = {
 
         /** Extract ?t=12m15s, ?t=123, ?start=123, ?stop=123, ?end=123
         */
-        try {     
-            var start = url.match(/(?:t|start|time_continue)=(\d+(?:m)?\d+(?:s)?)/i);
-            var end = url.match(/(?:stop|end)=(\d+(?:m)?\d+(?:s)?)/i);
+        try {
+            var start = options.getRequestOptions('players.start', url.match(/(?:t|start)=(\d+(?:m\d+)?(?:s)?m?)/i));
+            var end = options.getRequestOptions('players.end', url.match(/(?:stop|end)=(\d+(?:m\d+)?(?:s)?m?)/i));
 
-            if (start) {
+            var parseTime = function (t) {
+                if (typeof t === 'array') {
+                    t = t[1];
+                }
+                if (typeof t === "string") {
+                    var m = t.match(/(\d+)m/);
+                    var s = t.match(/(\d+)s/);
+                    var time = 0;
+                    if (m) {
+                        time = 60 * m[1];
+                    }
+                    if (s) {
+                        time += 1 * s[1];
+                    }
+                    return time;
+                } else {
+                    return parseInt(t);
+                }
+            };
 
-                var m = start[1].match(/(\d+)m/);
-                var s = start[1].match(/(\d+)s/);
-                var time = 0;
-                if (m) {
-                    time = 60 * m[1];
-                }
-                if (s) {
-                    time += 1 * s[1];
-                }
-                
-                params.start = time ? time : start[1];
+            if (start && start !== '') {
+                params.start = parseTime(start);
             }
 
-            if (end) {
-                params.end = end[1];
+            if (end && end !== '') {
+                params.end = parseTime(end);
             }
         } catch (ex) {/* and ignore */}
         // End of time extractions
 
         if (options.getProviderOptions('players.playerjs', false) || options.getProviderOptions('players.autopause', false)) {
             params.enablejsapi = 1;
-        }
-
-        if (options.getProviderOptions('players.showinfo', false) || options.getProviderOptions(CONFIG.O.full, false)) {
-            params.showinfo = 1;
         }
 
         if (options.getProviderOptions('locale', false)) {
@@ -194,15 +199,31 @@ module.exports = {
         }];
 
         if (youtube_video_gdata.embeddable) {
+
             var qs = querystring.stringify(params);
-            if (qs !== '') {qs = '?' + qs}        
+            if (qs !== '') {qs = '?' + qs}
+
+            var domain = /^https?:\/\/www\.youtube-nocookie\.com\//i.test(url) || options.getProviderOptions('youtube.nocookie', false) ? 'youtube-nocookie' : 'youtube';
 
             links.push({
-                href: 'https://www.youtube.com/embed/' + youtube_video_gdata.id + qs,
+                href: 'https://www.' + domain + '.com/embed/' + youtube_video_gdata.id + qs,
                 rel: [CONFIG.R.player, CONFIG.R.html5],
                 type: CONFIG.T.text_html,
                 "aspect-ratio": widescreen ? 16 / 9 : 4 / 3,
-                autoplay: "autoplay=1"
+                autoplay: "autoplay=1",
+                options: {
+                    start: {
+                        label: 'Start from',
+                        value: '' + (params.start || ''),
+                        placeholder: 'ex.: 11, 1m10s'
+                    },
+                    end: {
+                        label: 'End on',
+                        value: '' + (params.end || ''),
+                        placeholder: 'ex.: 11, 1m10s'
+                    }
+                }
+
             }); 
         } else {
             links.push({message: (youtube_video_gdata.uploader || "Uploader of this video") +  " disabled embedding on other sites."});

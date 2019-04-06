@@ -2,8 +2,8 @@ module.exports = {
 
     re: [
         /^https?:\/\/www\.imdb\.com\/video\/[\w]+\/vi(\d+)/i,
-        /^https?:\/\/www\.imdb\.com\/videoplayer\/vi(\d+)/i,        
-        /^https?:\/\/www\.imdb\.com\/title\/\w{2}[\d]+\/?[^\/#]+#\w{2}\-vi(\d+)$/i
+        /^https?:\/\/www\.imdb\.com(?:\/(?:title|list)\/\w{2}[\d]+)?\/videoplayer\/vi(\d+)/i,        
+        /^https?:\/\/www\.imdb\.com\/title\/\w{2}[\d]+\/?[^\/#]+#\w{2}\-vi(\d+)$/i        
     ],    
 
     mixins: [
@@ -23,12 +23,10 @@ module.exports = {
         }
 
         return {
-            href: "https://www.imdb.com/video/imdb/vi" + urlMatch[1] + "/imdb/embed?autoplay=false&width=" + width,
-            type: CONFIG.T.text_html,
+            href: "https://www.imdb.com/videoembed/vi" + urlMatch[1],
+            accept: CONFIG.T.text_html,
             rel: [CONFIG.R.player, CONFIG.R.html5],
-            width: width,
-            height: width / (16/9),
-            scrolling: 'no'
+            'aspect-ratio': 16/9
         }
     },
 
@@ -36,6 +34,8 @@ module.exports = {
         "https://www.imdb.com/video/epk/vi1061203225/",
         "https://www.imdb.com/video/imdb/vi2792795161?ref_=tt_pv_vi_aiv_2",
         "https://www.imdb.com/title/tt2937696/?ref_=ext_shr_tw_vi_tt_ov_vi#lb-vi1383576089",
-        "https://www.imdb.com/videoplayer/vi2792795161?ref_=tt_pv_vi_aiv_2"
+        "https://www.imdb.com/videoplayer/vi2792795161?ref_=tt_pv_vi_aiv_2",
+        "https://www.imdb.com/title/tt2177461/videoplayer/vi3236084505",
+        "https://www.imdb.com/list/ls053181649/videoplayer/vi2588392217"
     ]
 };
