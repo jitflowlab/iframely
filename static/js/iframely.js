@@ -4,7 +4,7 @@
 
      Iframely consumer client lib.
 
-     Version 1.2.5
+     Version 1.3.0
 
      Fetches and renders iframely oebmed/2 widgets.
 
@@ -136,6 +136,8 @@
         });
     };
 
+    var _RE = /^_.+/;
+
     $.iframely.getPageData = function(uri, options, cb) {
 
         if (typeof options === "function") {
@@ -145,27 +147,36 @@
 
         options = options || {};
 
+        var data = {
+            uri: !options.url ? uri : undefined,
+            url: options.url ? uri : undefined,
+            debug: options.debug,
+            mixAllWithDomainPlugin: options.mixAllWithDomainPlugin,
+            refresh: options.refresh,
+            meta: options.meta,
+            whitelist: options.whitelist,
+            api_key: options.api_key,
+            origin: options.origin,
+            autoplay: options.autoplay,
+            ssl: options.ssl,
+            html5: options.html5,
+            iframe: options.iframe,
+            group: options.group
+        };
+
+        // Add all _ options.
+        for(var key in options) {
+            if (key.length > 1 && _RE.test(key)) {
+                data[key] = options[key];
+            }
+        }
+
         $.support.cors = true;
         $.ajax({
             crossDomain: true,
             url: $.iframely.defaults.endpoint,
             dataType: "json",
-            data: {
-                uri: !options.url ? uri : undefined,
-                url: options.url ? uri : undefined,
-                debug: options.debug,
-                mixAllWithDomainPlugin: options.mixAllWithDomainPlugin,
-                refresh: options.refresh,
-                meta: options.meta,
-                whitelist: options.whitelist,
-                api_key: options.api_key,
-                origin: options.origin,
-                autoplay: options.autoplay,
-                ssl: options.ssl,
-                html5: options.html5,
-                iframe: options.iframe,
-                group: options.group
-            },
+            data: data,
             success: function(data, textStatus, jqXHR) {
                 cb(null, data, jqXHR);
             },
@@ -306,9 +317,13 @@
         },
         "mp4video": {
             test: function(data) {
-                return (data.type == "video/mp4"
+                return data.type == "video/mp4"
                     || data.type == "video/webm"
-                    || data.type == "video/ogg");
+                    || data.type == "video/ogg"
+                    || (window.Hls && Hls.isSupported() && (
+                        data.type == "application/x-mpegURL" || data.type == "application/x-mpegurl"
+                        || data.type == "application/vnd.apple.mpegurl"
+                    ));
             },
             generate: function(data, options) {
 
@@ -394,6 +409,14 @@
                     .attr('src', data.href)
                     .attr('type', data.type);
 
+                if (data.type == "application/x-mpegURL"
+                    || data.type == "application/vnd.apple.mpegurl") {
+
+                    var hls = new Hls();
+                    hls.loadSource(data.href);
+                    hls.attachMedia($video.get(0));
+                }
+
                 if (options && options.disableSizeWrapper) {
                     return $video;
                 } else {
@@ -457,7 +480,15 @@
                 }
                 return $el;
             }
-        }
+        },
+        "mp3audio": {
+            test: function(data) {
+                return /^audio\//i.test(data.type) && data.href;
+            },
+            generate: function(data) {
+                return $('<audio controls preload="auto"><source src="' + data.href + '" type="audio/mp3"></audio>');
+            }
+        },        
     };
 
     $.iframely.generateLinkElement = function(link, options) {

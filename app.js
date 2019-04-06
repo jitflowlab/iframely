@@ -121,8 +121,13 @@ function errorHandler(err, req, res, next) {
 
     var message = 'Server error';
 
-    if (code === 401) {
+    if (code === 400) {
+      message = err.message && ('Bad Request: ' + err.message) || 'Bad Request';
+    }
+    else if (code === 401) {
       message = 'Unauthorized';
+      // Force 403 to prevent Basic auth popup.
+      code = 403;
     }
     else if (code === 403) {
       message = 'Forbidden';
@@ -152,7 +157,7 @@ process.on('uncaughtException', function(err) {
   }
 });
 
-if (!CONFIG.DISABLE_SERVE_STATIC) {
+if (process.env.NODE_ENV !== 'test') {
   // This code not compatible with 'supertest' (in e2e.js)
   // Disabled for tests.
   app.use(CONFIG.relativeStaticUrl, express.static('static'));

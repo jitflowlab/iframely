@@ -1,7 +1,7 @@
 module.exports = {
 
     re: [
-        /^https?:\/\/(\w+\.)?d\.pr\/(?:i\/)([a-zA-Z0-9]+)/i
+        /^https?:\/\/(\w+\.)?d\.pr\/(?:i\/)?([a-zA-Z0-9]+)/i
     ],
 
     // oembeds here to avoid redirects for 404s
@@ -13,7 +13,7 @@ module.exports = {
 
     getLink: function(oembed) {
 
-        if ( /image|photo/.test(oembed.type)) {
+        if ( /image|photo/.test(oembed.type) || /image/i.test(oembed.drop_type)) {
             return {
                 href: oembed.url,
                 type: CONFIG.T.image,
